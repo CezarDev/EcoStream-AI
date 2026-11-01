@@ -1,0 +1,80 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "A801",
+    "name": "Porto Alegre — Jardim Botânico (INMET A801)",
+    "provider": "OpenMeteo"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -51.1748,
+     -30.0535
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "POA-CENTRO",
+    "name": "Centro Histórico",
+    "provider": "OpenMeteo"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -51.23,
+     -30.033
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "POA-SARANDI",
+    "name": "Sarandi",
+    "provider": "OpenMeteo"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -51.12,
+     -29.98
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "POA-ILHAS",
+    "name": "Ilhas do Arquipélago",
+    "provider": "OpenMeteo"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -51.255,
+     -30.0
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "POA-IPANEMA",
+    "name": "Ipanema",
+    "provider": "OpenMeteo"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -51.225,
+     -30.132
+    ]
+   }
+  }
+ ]
+}

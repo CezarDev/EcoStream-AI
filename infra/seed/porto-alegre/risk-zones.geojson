@@ -1,0 +1,145 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Inundação — 4º Distrito / Zona Norte",
+    "riskType": "Flood",
+    "level": 5
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.23,
+       -30.01
+      ],
+      [
+       -51.1,
+       -30.01
+      ],
+      [
+       -51.1,
+       -29.96
+      ],
+      [
+       -51.23,
+       -29.96
+      ],
+      [
+       -51.23,
+       -30.01
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Inundação — Orla Centro / Menino Deus",
+    "riskType": "Flood",
+    "level": 4
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.245,
+       -30.065
+      ],
+      [
+       -51.222,
+       -30.065
+      ],
+      [
+       -51.222,
+       -30.025
+      ],
+      [
+       -51.245,
+       -30.025
+      ],
+      [
+       -51.245,
+       -30.065
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Inundação — Ilhas do Arquipélago",
+    "riskType": "Flood",
+    "level": 5
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.275,
+       -30.022
+      ],
+      [
+       -51.24,
+       -30.022
+      ],
+      [
+       -51.24,
+       -29.972
+      ],
+      [
+       -51.275,
+       -29.972
+      ],
+      [
+       -51.275,
+       -30.022
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Deslizamento — Morro da Cruz",
+    "riskType": "Landslide",
+    "level": 3
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.172,
+       -30.072
+      ],
+      [
+       -51.155,
+       -30.072
+      ],
+      [
+       -51.155,
+       -30.058
+      ],
+      [
+       -51.172,
+       -30.058
+      ],
+      [
+       -51.172,
+       -30.072
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../Core/EcoStream.Application/EcoStream.Application.csproj" />
+  </ItemGroup>
+</Project>

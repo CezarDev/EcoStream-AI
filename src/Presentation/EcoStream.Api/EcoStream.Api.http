@@ -1,0 +1,27 @@
+@api = http://localhost:5080
+
+### Stations (seeded by EcoStream.DbMigrator)
+GET {{api}}/api/stations
+
+### Latest reading per station
+GET {{api}}/api/telemetry/latest
+
+### Last 24h series for a station
+GET {{api}}/api/stations/A801/readings
+
+### Neighborhoods within 3 km of Centro Histórico (PostGIS ST_DWithin)
+GET {{api}}/api/geo/neighborhoods/near?lat=-30.0330&lon=-51.2300&radiusKm=3
+
+### Manual reading — normal
+POST {{api}}/api/telemetry
+Content-Type: application/json
+
+{ "stationCode": "POA-CENTRO", "measuredAt": "2026-11-01T12:00:00Z",
+  "rainfallMmPerHour": 4.2, "windGustKmh": 22, "pressureHpa": 1012 }
+
+### Manual reading — severe anomaly (publishes AnomalyDetectedIntegrationEvent)
+POST {{api}}/api/telemetry
+Content-Type: application/json
+
+{ "stationCode": "POA-CENTRO", "measuredAt": "2026-11-01T13:00:00Z",
+  "rainfallMmPerHour": 72.5, "windGustKmh": 104, "pressureHpa": 978 }

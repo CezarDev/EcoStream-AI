@@ -1,0 +1,73 @@
+name: ecostream
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: ecostream-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ecostream}
+      POSTGRES_USER: ${POSTGRES_USER:-ecostream}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ecostream}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: ecostream-rabbitmq
+    hostname: ecostream-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-ecostream}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-ecostream}
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI -> http://localhost:15672
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.0
+    container_name: ecostream-qdrant
+    ports:
+      - "6333:6333"  # REST + dashboard -> http://localhost:6333/dashboard
+      - "6334:6334"  # gRPC (used by the .NET client)
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.65.0
+    container_name: ecostream-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # UI -> http://localhost:16686
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+
+  # Optional local LLM (Phase 3). Start with: docker compose --profile llm up -d
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ecostream-ollama
+    profiles: ["llm"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
+  qdrant-data:
+  ollama-data:

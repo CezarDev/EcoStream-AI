@@ -1,0 +1,30 @@
+<Solution>
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/EcoStream.Domain/EcoStream.Domain.csproj" />
+    <Project Path="src/Core/EcoStream.Application/EcoStream.Application.csproj" />
+  </Folder>
+  <Folder Name="/src/Contracts/">
+    <Project Path="src/Contracts/EcoStream.Contracts/EcoStream.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/EcoStream.Infrastructure/EcoStream.Infrastructure.csproj" />
+    <Project Path="src/Infrastructure/EcoStream.AI/EcoStream.AI.csproj" />
+    <Project Path="src/Infrastructure/EcoStream.Notifications/EcoStream.Notifications.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/Presentation/EcoStream.Api/EcoStream.Api.csproj" />
+    <Project Path="src/Presentation/EcoStream.McpServer/EcoStream.McpServer.csproj" />
+  </Folder>
+  <Folder Name="/src/Workers/">
+    <Project Path="src/Workers/EcoStream.Ingestion.Worker/EcoStream.Ingestion.Worker.csproj" />
+    <Project Path="src/Workers/EcoStream.Agents.Worker/EcoStream.Agents.Worker.csproj" />
+  </Folder>
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Tools/EcoStream.DbMigrator/EcoStream.DbMigrator.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EcoStream.Domain.Tests/EcoStream.Domain.Tests.csproj" />
+    <Project Path="tests/EcoStream.Application.Tests/EcoStream.Application.Tests.csproj" />
+    <Project Path="tests/EcoStream.Infrastructure.Tests/EcoStream.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

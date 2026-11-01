@@ -1,0 +1,390 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Centro Histórico",
+    "city": "Porto Alegre",
+    "population": 39000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.24,
+       -30.04
+      ],
+      [
+       -51.215,
+       -30.04
+      ],
+      [
+       -51.215,
+       -30.025
+      ],
+      [
+       -51.24,
+       -30.025
+      ],
+      [
+       -51.24,
+       -30.04
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Cidade Baixa",
+    "city": "Porto Alegre",
+    "population": 16000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.228,
+       -30.048
+      ],
+      [
+       -51.212,
+       -30.048
+      ],
+      [
+       -51.212,
+       -30.04
+      ],
+      [
+       -51.228,
+       -30.04
+      ],
+      [
+       -51.228,
+       -30.048
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Praia de Belas",
+    "city": "Porto Alegre",
+    "population": 2000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.24,
+       -30.062
+      ],
+      [
+       -51.228,
+       -30.062
+      ],
+      [
+       -51.228,
+       -30.048
+      ],
+      [
+       -51.24,
+       -30.048
+      ],
+      [
+       -51.24,
+       -30.062
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Menino Deus",
+    "city": "Porto Alegre",
+    "population": 30000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.228,
+       -30.065
+      ],
+      [
+       -51.212,
+       -30.065
+      ],
+      [
+       -51.212,
+       -30.048
+      ],
+      [
+       -51.228,
+       -30.048
+      ],
+      [
+       -51.228,
+       -30.065
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Navegantes",
+    "city": "Porto Alegre",
+    "population": 4000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.212,
+       -30.005
+      ],
+      [
+       -51.19,
+       -30.005
+      ],
+      [
+       -51.19,
+       -29.988
+      ],
+      [
+       -51.212,
+       -29.988
+      ],
+      [
+       -51.212,
+       -30.005
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Humaitá",
+    "city": "Porto Alegre",
+    "population": 11000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.215,
+       -29.988
+      ],
+      [
+       -51.19,
+       -29.988
+      ],
+      [
+       -51.19,
+       -29.975
+      ],
+      [
+       -51.215,
+       -29.975
+      ],
+      [
+       -51.215,
+       -29.988
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Sarandi",
+    "city": "Porto Alegre",
+    "population": 60000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.14,
+       -29.995
+      ],
+      [
+       -51.105,
+       -29.995
+      ],
+      [
+       -51.105,
+       -29.965
+      ],
+      [
+       -51.14,
+       -29.965
+      ],
+      [
+       -51.14,
+       -29.995
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Arquipélago",
+    "city": "Porto Alegre",
+    "population": 8000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.27,
+       -30.02
+      ],
+      [
+       -51.242,
+       -30.02
+      ],
+      [
+       -51.242,
+       -29.975
+      ],
+      [
+       -51.27,
+       -29.975
+      ],
+      [
+       -51.27,
+       -30.02
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Jardim Botânico",
+    "city": "Porto Alegre",
+    "population": 12000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.185,
+       -30.06
+      ],
+      [
+       -51.165,
+       -30.06
+      ],
+      [
+       -51.165,
+       -30.045
+      ],
+      [
+       -51.185,
+       -30.045
+      ],
+      [
+       -51.185,
+       -30.06
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Partenon",
+    "city": "Porto Alegre",
+    "population": 48000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.175,
+       -30.07
+      ],
+      [
+       -51.15,
+       -30.07
+      ],
+      [
+       -51.15,
+       -30.055
+      ],
+      [
+       -51.175,
+       -30.055
+      ],
+      [
+       -51.175,
+       -30.07
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Ipanema",
+    "city": "Porto Alegre",
+    "population": 5000
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -51.235,
+       -30.14
+      ],
+      [
+       -51.215,
+       -30.14
+      ],
+      [
+       -51.215,
+       -30.125
+      ],
+      [
+       -51.235,
+       -30.125
+      ],
+      [
+       -51.235,
+       -30.14
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

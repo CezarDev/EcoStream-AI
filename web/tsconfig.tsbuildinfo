@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/statcard.tsx","./src/features/map/riskmap.tsx","./src/features/telemetry/rainfallchart.tsx","./src/lib/mockdata.ts","./src/lib/types.ts"],"version":"5.6.3"}
