@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace EcoStream.Application.Pipeline;
 
-internal sealed class PostGisAffectedAreaAnalyzer(IGeoQueries geo, IOptions<PipelineOptions> options) : IAffectedAreaAnalyzer
+public sealed class PostGisAffectedAreaAnalyzer(IGeoQueries geo, IOptions<PipelineOptions> options) : IAffectedAreaAnalyzer
 {
     public async Task<AffectedAreasIdentified> AnalyzeAsync(AnomalyDetectedIntegrationEvent anomaly, CancellationToken cancellationToken)
     {
@@ -22,7 +22,7 @@ internal sealed class PostGisAffectedAreaAnalyzer(IGeoQueries geo, IOptions<Pipe
     }
 }
 
-internal sealed class RuleBasedRiskDecider : IRiskDecider
+public sealed class RuleBasedRiskDecider : IRiskDecider
 {
     public const string Name = "rules-v1";
 
@@ -61,10 +61,10 @@ internal sealed class RuleBasedRiskDecider : IRiskDecider
     }
 }
 
-internal sealed class RuleBasedAlertComposer : IAlertComposer
+public sealed class RuleBasedAlertComposer : IAlertComposer
 {
     /// <summary>Minimum severity for each channel: ops always, public channels only when it matters.</summary>
-    internal static readonly IReadOnlyDictionary<string, int> MinSeverity = new Dictionary<string, int>
+    public static readonly IReadOnlyDictionary<string, int> MinSeverity = new Dictionary<string, int>
     {
         [AlertChannels.Slack] = 1,
         [AlertChannels.Telegram] = 3,
@@ -73,15 +73,24 @@ internal sealed class RuleBasedAlertComposer : IAlertComposer
 
     public Task<IReadOnlyList<AlertDispatchRequested>> ComposeAsync(RiskAssessed risk, CancellationToken cancellationToken)
     {
-        var title = $"[Severity {risk.Severity}/5] Weather alert — {risk.Anomaly.StationCode}";
+        var title = TitleFor(risk);
 
-        IReadOnlyList<AlertDispatchRequested> messages = MinSeverity
-            .Where(c => risk.Severity >= c.Value)
-            .Select(c => new AlertDispatchRequested(risk.ReadingId, risk.Severity, c.Key, title, Body(c.Key, risk)))
+        IReadOnlyList<AlertDispatchRequested> messages = ChannelsFor(risk.Severity)
+            .Select(c => new AlertDispatchRequested(risk.ReadingId, risk.Severity, c, title, Body(c, risk)))
             .ToList();
 
         return Task.FromResult(messages);
     }
+
+    public const int SmsMaxLength = 160;
+
+    public static string TitleFor(RiskAssessed risk) => $"[Severity {risk.Severity}/5] Weather alert — {risk.Anomaly.StationCode}";
+
+    /// <summary>Deterministic channel selection — never delegated to an LLM.</summary>
+    public static IEnumerable<string> ChannelsFor(int severity) =>
+        MinSeverity.Where(c => severity >= c.Value).Select(c => c.Key);
+
+    public static string FitSms(string text) => text.Length <= SmsMaxLength ? text : text[..(SmsMaxLength - 3)] + "...";
 
     private static string Body(string channel, RiskAssessed risk)
     {
@@ -90,7 +99,7 @@ internal sealed class RuleBasedAlertComposer : IAlertComposer
         if (channel == AlertChannels.Sms) // 160-char budget, plain text
         {
             var sms = $"ALERTA DEFESA CIVIL nivel {risk.Severity}/5: chuva forte em {areas}. Evite areas alagadas. Emergencia: 199";
-            return sms.Length <= 160 ? sms : sms[..157] + "...";
+            return FitSms(sms);
         }
 
         var sb = new StringBuilder()

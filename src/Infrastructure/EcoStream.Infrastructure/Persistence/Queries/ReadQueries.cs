@@ -60,4 +60,28 @@ internal sealed class GeoQueries(EcoStreamDbContext db) : IGeoQueries
             .OrderBy(x => x.DistanceMeters)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<RiverProximityDto>> FindRiversWithinAsync(
+        double latitude, double longitude, double radiusKm, CancellationToken cancellationToken)
+    {
+        var origin = new Point(longitude, latitude) { SRID = GeoPointConversion.Wgs84 };
+        return await db.Rivers.AsNoTracking()
+            .Where(r => r.Course.IsWithinDistance(origin, radiusKm * 1000))
+            .Select(r => new RiverProximityDto(r.Name, r.Course.Distance(origin)))
+            .OrderBy(x => x.DistanceMeters)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<RiskZoneProximityDto>> FindRiskZonesWithinAsync(
+        double latitude, double longitude, double radiusKm, CancellationToken cancellationToken)
+    {
+        var origin = new Point(longitude, latitude) { SRID = GeoPointConversion.Wgs84 };
+        var zones = await db.RiskZones.AsNoTracking()
+            .Where(z => z.Boundary.IsWithinDistance(origin, radiusKm * 1000))
+            .Select(z => new { z.Name, z.RiskType, z.Level, Distance = z.Boundary.Distance(origin), Contains = z.Boundary.Intersects(origin) })
+            .OrderByDescending(x => x.Level).ThenBy(x => x.Distance)
+            .ToListAsync(cancellationToken);
+
+        return zones.Select(z => new RiskZoneProximityDto(z.Name, z.RiskType.ToString(), z.Level, z.Distance, z.Contains)).ToList();
+    }
 }

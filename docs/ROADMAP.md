@@ -29,13 +29,15 @@ Cada fase termina com algo **demonstrável** (bom para post no LinkedIn) e com t
 - **Pendente (precisa de Docker):** validar contra RabbitMQ/Postgres reais e capturar o trace no Jaeger.
 - **Demo:** `POST` de leitura severa → mensagem atravessa filas → trace completo → alertas por canal no log.
 
-## Fase 3 — Agentes de IA, MCP & RAG
-- `EcoStream.McpServer` com SDK oficial de MCP para C#: tools `find_neighborhoods_within_radius`, `find_rivers_near`, `get_risk_zones_intersecting` (PostGIS `ST_DWithin`, `ST_Intersects`).
-- Ingestão de manuais da Defesa Civil → chunking → embeddings → **Qdrant**.
-- Semantic Kernel: 4 agentes (Analista de Dados → RAG & Protocolos → Decisor de Risco → Comunicador), cada passo encadeado por mensagem RabbitMQ.
-- Provedor de LLM plugável por configuração (OpenAI / Azure OpenAI / Ollama).
-- Saída estruturada (JSON schema) no Decisor; testes de avaliação com cenários fixos.
-- **Demo:** anomalia gera relatório de contingência com severidade 1–5 e protocolos citados.
+## Fase 3 — Agentes de IA, MCP & RAG ✅
+- `EcoStream.McpServer` (SDK oficial MCP C# 2.3, streamable HTTP, stateless): tools `find_neighborhoods_within_radius`, `find_rivers_near`, `get_risk_zones_near` sobre PostGIS; raio limitado a 50 km.
+- RAG: `MarkdownChunker` (por seção, ids estáveis) → embeddings → Qdrant 1.20 via `EcoStream.KnowledgeIngestor`; protocolos didáticos em `docs/protocols/`.
+- Semantic Kernel 1.81 (`ChatCompletionAgent`): Analista de Dados (tools MCP), Decisor de Risco (saída estruturada JSON + citações), Comunicador (texto por canal).
+- Provedor plugável por config: OpenAI, Azure OpenAI ou Ollama (endpoint compatível OpenAI); padrão `Rules`.
+- **Guardrails:** fatos (bairros, população) nunca gerados pelo LLM; severidade reconciliada com o baseline (±1, senão o mais severo); citações inexistentes descartadas; canais e limite de SMS determinísticos; timeout + fallback por etapa.
+- Testes: agentes com chat fake (sem LLM), guardrail/fallback, chunker, round-trip MCP real in-process; **evals** com provedor real (opt-in `ECOSTREAM_AI_EVALS=1`).
+- **Pendente:** rodar com Docker (Qdrant/Postgres/RabbitMQ) e um provedor real; ajustar prompts pelos resultados dos evals.
+- **Demo:** anomalia gera relatório de contingência com severidade 1–5, notas do analista e protocolos citados.
 
 ## Fase 4 — Notificações & Frontend real
 - `Notifications`: Telegram.Bot, Twilio (SMS/voz para severidade ≥ 4), webhooks Slack/Teams; cada canal com Polly e rate limit.

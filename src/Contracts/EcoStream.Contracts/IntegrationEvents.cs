@@ -25,7 +25,8 @@ public sealed record AffectedAreasIdentified(
     Guid ReadingId,
     AnomalySnapshot Anomaly,
     IReadOnlyList<AffectedNeighborhood> Neighborhoods,
-    int EstimatedPopulation);
+    int EstimatedPopulation,
+    string? AnalystNotes = null);
 
 /// <summary>Output of the Risk Decider step.</summary>
 public sealed record RiskAssessed(
@@ -35,7 +36,8 @@ public sealed record RiskAssessed(
     string Summary,
     IReadOnlyList<string> AffectedNeighborhoods,
     IReadOnlyList<string> RecommendedActions,
-    string AssessedBy);
+    string AssessedBy,
+    IReadOnlyList<string>? CitedProtocols = null);
 
 /// <summary>
 /// Published to the topic exchange <c>ecostream.alerts</c> with routing key

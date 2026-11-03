@@ -45,13 +45,14 @@ clima/
 │   │   └── EcoStream.Contracts/       # integration events carried over RabbitMQ
 │   ├── Infrastructure/
 │   │   ├── EcoStream.Infrastructure/  # EF Core + PostGIS, MassTransit, Polly, OpenTelemetry
-│   │   ├── EcoStream.AI/              # Semantic Kernel agents, RAG/Qdrant (Phase 3)
+│   │   ├── EcoStream.AI/              # Semantic Kernel agents, MCP client, RAG/Qdrant, guardrails
 │   │   └── EcoStream.Notifications/   # Telegram, Twilio, Slack/Teams (Phase 4)
 │   ├── Presentation/
 │   │   ├── EcoStream.Api/             # ASP.NET Core Minimal API
-│   │   └── EcoStream.McpServer/       # MCP server exposing PostGIS tools (Phase 3)
+│   │   └── EcoStream.McpServer/       # MCP server exposing PostGIS tools
 │   ├── Tools/
-│   │   └── EcoStream.DbMigrator/      # applies migrations + imports GeoJSON from infra/seed/
+│   │   ├── EcoStream.DbMigrator/      # applies migrations + imports GeoJSON from infra/seed/
+│   │   └── EcoStream.KnowledgeIngestor/ # embeds docs/protocols into Qdrant (RAG)
 │   └── Workers/
 │       ├── EcoStream.Ingestion.Worker/  # polls telemetry providers
 │       └── EcoStream.Agents.Worker/     # RabbitMQ consumers → multi-agent pipeline
@@ -66,6 +67,7 @@ clima/
 │       ├── features/telemetry/    # charts (Recharts)
 │       └── lib/                   # types, API client
 ├── docs/ROADMAP.md
+├── docs/protocols/                # RAG knowledge base (illustrative)
 └── .github/workflows/ci.yml
 ```
 
@@ -114,6 +116,37 @@ API / Ingestion ──(outbox)──► ecostream.anomaly-detected (fanout)
 - **Failure handling:** exponential retry → delayed redelivery (1/5/15 min, RabbitMQ delayed-exchange plugin) → `<queue>_error`. Validation/domain errors skip retries.
 - **Tracing:** trace context flows API → outbox → RabbitMQ → every consumer; see the whole incident as one trace in Jaeger.
 - Steps are interfaces (`IAffectedAreaAnalyzer`, `IRiskDecider`, `IAlertComposer`); Phase 3 plugs AI agents in, rules stay as fallback.
+
+#### AI agents, MCP & RAG (Phase 3)
+| Agent | LLM does | Stays deterministic |
+|---|---|---|
+| Data Analyst | calls MCP tools (rivers, risk zones) and writes analyst notes | neighborhood list comes from PostGIS — never generated |
+| RAG & Protocols | — (embeddings only) | vector search over Civil Defense protocols in Qdrant |
+| Risk Decider | severity, summary, actions as JSON with protocol citations | **guardrail**: if AI and rules differ by >1 level, the more severe wins; invented citations are dropped |
+| Communicator | writes each channel's text | which channels fire (by severity) and the 160-char SMS limit |
+
+Every AI step has a time budget and **falls back to the rules** on timeout, provider error or invalid output. Default is `Ai:Provider = Rules` (AI off).
+
+```bash
+# OpenAI
+dotnet user-secrets --id ecostream-ai set "Ai:Provider" "OpenAI"
+dotnet user-secrets --id ecostream-ai set "Ai:ChatModel" "gpt-4.1-mini"            # any tool-calling model
+dotnet user-secrets --id ecostream-ai set "Ai:EmbeddingModel" "text-embedding-3-small"
+dotnet user-secrets --id ecostream-ai set "Ai:ApiKey" "sk-..."
+
+# or local & free with Ollama (brew install ollama)
+ollama pull llama3.1:8b && ollama pull nomic-embed-text
+dotnet user-secrets --id ecostream-ai set "Ai:Provider" "Ollama"
+dotnet user-secrets --id ecostream-ai set "Ai:ChatModel" "llama3.1:8b"
+dotnet user-secrets --id ecostream-ai set "Ai:EmbeddingModel" "nomic-embed-text"
+
+dotnet run --project src/Tools/EcoStream.KnowledgeIngestor      # embed docs/protocols into Qdrant
+dotnet run --project src/Presentation/EcoStream.McpServer       # MCP tools at http://localhost:5090/mcp
+dotnet run --project src/Workers/EcoStream.Agents.Worker
+```
+- Inspect the MCP server with any client: `npx @modelcontextprotocol/inspector` → `http://localhost:5090/mcp`.
+- Model evals (real provider, cost tokens): `ECOSTREAM_AI_EVALS=1 Ai__Provider=... dotnet test tests/EcoStream.AI.Tests`.
+- `docs/protocols/` holds **illustrative, unofficial** protocol texts written for this project.
 
 #### Migrations
 ```bash
@@ -175,13 +208,14 @@ clima/
 │   │   └── EcoStream.Contracts/       # eventos de integração trafegados no RabbitMQ
 │   ├── Infrastructure/
 │   │   ├── EcoStream.Infrastructure/  # EF Core + PostGIS, MassTransit, Polly, OpenTelemetry
-│   │   ├── EcoStream.AI/              # agentes Semantic Kernel, RAG/Qdrant (Fase 3)
+│   │   ├── EcoStream.AI/              # agentes Semantic Kernel, cliente MCP, RAG/Qdrant, guardrails
 │   │   └── EcoStream.Notifications/   # Telegram, Twilio, Slack/Teams (Fase 4)
 │   ├── Presentation/
 │   │   ├── EcoStream.Api/             # ASP.NET Core Minimal API
-│   │   └── EcoStream.McpServer/       # servidor MCP expondo tools PostGIS (Fase 3)
+│   │   └── EcoStream.McpServer/       # servidor MCP expondo tools PostGIS
 │   ├── Tools/
-│   │   └── EcoStream.DbMigrator/      # aplica migrations + importa GeoJSON de infra/seed/
+│   │   ├── EcoStream.DbMigrator/      # aplica migrations + importa GeoJSON de infra/seed/
+│   │   └── EcoStream.KnowledgeIngestor/ # embeddings de docs/protocols no Qdrant (RAG)
 │   └── Workers/
 │       ├── EcoStream.Ingestion.Worker/  # polling das fontes de telemetria
 │       └── EcoStream.Agents.Worker/     # consumers RabbitMQ → pipeline multiagente
@@ -196,6 +230,7 @@ clima/
 │       ├── features/telemetry/    # gráficos (Recharts)
 │       └── lib/                   # tipos, cliente da API
 ├── docs/ROADMAP.md
+├── docs/protocols/                # base de conhecimento do RAG (didática)
 └── .github/workflows/ci.yml
 ```
 
@@ -244,6 +279,37 @@ API / Ingestion ──(outbox)──► ecostream.anomaly-detected (fanout)
 - **Falhas:** retry exponencial → redelivery atrasado (1/5/15 min, plugin delayed-exchange) → `<fila>_error`. Erros de validação/domínio não fazem retry.
 - **Tracing:** o contexto do trace atravessa API → outbox → RabbitMQ → cada consumer; o incidente inteiro aparece como um trace no Jaeger.
 - Cada etapa é uma interface (`IAffectedAreaAnalyzer`, `IRiskDecider`, `IAlertComposer`); na Fase 3 entram os agentes de IA e as regras ficam como fallback.
+
+#### Agentes de IA, MCP & RAG (Fase 3)
+| Agente | O LLM faz | Continua determinístico |
+|---|---|---|
+| Analista de Dados | chama tools MCP (rios, zonas de risco) e escreve notas | lista de bairros vem do PostGIS — nunca gerada |
+| RAG & Protocolos | — (só embeddings) | busca vetorial nos protocolos da Defesa Civil no Qdrant |
+| Decisor de Risco | severidade, resumo e ações em JSON, citando protocolos | **guardrail**: se IA e regras divergem >1 nível, vence o mais severo; citações inventadas são descartadas |
+| Comunicador | escreve o texto de cada canal | quais canais disparam (pela severidade) e o limite de 160 caracteres do SMS |
+
+Cada etapa de IA tem orçamento de tempo e **cai para as regras** em timeout, erro do provedor ou saída inválida. Padrão: `Ai:Provider = Rules` (IA desligada).
+
+```bash
+# OpenAI
+dotnet user-secrets --id ecostream-ai set "Ai:Provider" "OpenAI"
+dotnet user-secrets --id ecostream-ai set "Ai:ChatModel" "gpt-4.1-mini"            # qualquer modelo com tool calling
+dotnet user-secrets --id ecostream-ai set "Ai:EmbeddingModel" "text-embedding-3-small"
+dotnet user-secrets --id ecostream-ai set "Ai:ApiKey" "sk-..."
+
+# ou local e gratuito com Ollama (brew install ollama)
+ollama pull llama3.1:8b && ollama pull nomic-embed-text
+dotnet user-secrets --id ecostream-ai set "Ai:Provider" "Ollama"
+dotnet user-secrets --id ecostream-ai set "Ai:ChatModel" "llama3.1:8b"
+dotnet user-secrets --id ecostream-ai set "Ai:EmbeddingModel" "nomic-embed-text"
+
+dotnet run --project src/Tools/EcoStream.KnowledgeIngestor      # embeddings de docs/protocols no Qdrant
+dotnet run --project src/Presentation/EcoStream.McpServer       # tools MCP em http://localhost:5090/mcp
+dotnet run --project src/Workers/EcoStream.Agents.Worker
+```
+- Inspecione o servidor MCP com qualquer cliente: `npx @modelcontextprotocol/inspector` → `http://localhost:5090/mcp`.
+- Evals do modelo (provedor real, consome tokens): `ECOSTREAM_AI_EVALS=1 Ai__Provider=... dotnet test tests/EcoStream.AI.Tests`.
+- `docs/protocols/` contém textos de protocolo **didáticos, não oficiais**, escritos para este projeto.
 
 #### Migrations
 ```bash

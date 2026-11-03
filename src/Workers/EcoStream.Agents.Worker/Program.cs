@@ -1,3 +1,4 @@
+using EcoStream.AI;
 using EcoStream.Agents.Worker.Consumers;
 using EcoStream.Application;
 using EcoStream.Contracts;
@@ -10,6 +11,7 @@ using OpenTelemetry.Trace;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddIncidentPipeline();
+builder.Services.AddAiAgents(builder.Configuration); // no-op when Ai:Provider = Rules
 builder.Services.AddNotifications();
 builder.Services.AddInfrastructure(builder.Configuration,
     bus =>
@@ -27,6 +29,9 @@ builder.Services.AddInfrastructure(builder.Configuration,
             cfg.AlertsEndpoint<AlertDispatchConsumer>(context, $"notifications-{channel}", $"alerts.*.{channel}");
         }
     });
-builder.AddEcoStreamTelemetry("ecostream-agents", t => t.AddHttpClientInstrumentation());
+builder.AddEcoStreamTelemetry("ecostream-agents", t => t
+    .AddHttpClientInstrumentation()
+    .AddSource("Microsoft.SemanticKernel*")   // agent invocations, tool calls, token usage
+    .AddSource("Experimental.ModelContextProtocol*"));
 
 builder.Build().Run();

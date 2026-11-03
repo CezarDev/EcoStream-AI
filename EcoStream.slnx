@@ -21,11 +21,14 @@
   </Folder>
   <Folder Name="/src/Tools/">
     <Project Path="src/Tools/EcoStream.DbMigrator/EcoStream.DbMigrator.csproj" />
+    <Project Path="src/Tools/EcoStream.KnowledgeIngestor/EcoStream.KnowledgeIngestor.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EcoStream.Domain.Tests/EcoStream.Domain.Tests.csproj" />
     <Project Path="tests/EcoStream.Application.Tests/EcoStream.Application.Tests.csproj" />
     <Project Path="tests/EcoStream.Infrastructure.Tests/EcoStream.Infrastructure.Tests.csproj" />
     <Project Path="tests/EcoStream.Agents.Worker.Tests/EcoStream.Agents.Worker.Tests.csproj" />
+    <Project Path="tests/EcoStream.AI.Tests/EcoStream.AI.Tests.csproj" />
+    <Project Path="tests/EcoStream.McpServer.Tests/EcoStream.McpServer.Tests.csproj" />
   </Folder>
 </Solution>

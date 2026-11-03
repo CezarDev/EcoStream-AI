@@ -22,9 +22,13 @@ public static class DependencyInjection
     public static IServiceCollection AddIncidentPipeline(this IServiceCollection services)
     {
         services.AddOptions<PipelineOptions>().BindConfiguration(PipelineOptions.Section);
-        services.AddScoped<IAffectedAreaAnalyzer, PostGisAffectedAreaAnalyzer>();
-        services.AddSingleton<IRiskDecider, RuleBasedRiskDecider>();
-        services.AddSingleton<IAlertComposer, RuleBasedAlertComposer>();
+        // Concrete types are registered too so AI decorators (EcoStream.AI) can use them as fallbacks.
+        services.AddScoped<PostGisAffectedAreaAnalyzer>();
+        services.AddSingleton<RuleBasedRiskDecider>();
+        services.AddSingleton<RuleBasedAlertComposer>();
+        services.AddScoped<IAffectedAreaAnalyzer>(sp => sp.GetRequiredService<PostGisAffectedAreaAnalyzer>());
+        services.AddSingleton<IRiskDecider>(sp => sp.GetRequiredService<RuleBasedRiskDecider>());
+        services.AddSingleton<IAlertComposer>(sp => sp.GetRequiredService<RuleBasedAlertComposer>());
         return services;
     }
 }

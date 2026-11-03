@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
+  <PropertyGroup>
+    <UserSecretsId>ecostream-ai</UserSecretsId>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../Infrastructure/EcoStream.Infrastructure/EcoStream.Infrastructure.csproj" />
     <ProjectReference Include="../../Infrastructure/EcoStream.AI/EcoStream.AI.csproj" />

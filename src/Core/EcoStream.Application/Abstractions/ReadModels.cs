@@ -18,6 +18,10 @@ public sealed record NeighborhoodProximityDto(
     double DistanceMeters,
     bool InFloodZone);
 
+public sealed record RiverProximityDto(string Name, double DistanceMeters);
+
+public sealed record RiskZoneProximityDto(string Name, string RiskType, int Level, double DistanceMeters, bool ContainsPoint);
+
 public interface IStationQueries
 {
     Task<IReadOnlyList<StationDto>> ListAsync(bool onlyActive, CancellationToken cancellationToken);
@@ -34,5 +38,11 @@ public interface ITelemetryQueries
 public interface IGeoQueries
 {
     Task<IReadOnlyList<NeighborhoodProximityDto>> FindNeighborhoodsWithinAsync(
+        double latitude, double longitude, double radiusKm, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<RiverProximityDto>> FindRiversWithinAsync(
+        double latitude, double longitude, double radiusKm, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<RiskZoneProximityDto>> FindRiskZonesWithinAsync(
         double latitude, double longitude, double radiusKm, CancellationToken cancellationToken);
 }

@@ -1,5 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- SKEXP0001/0010/0110: Semantic Kernel agents + custom OpenAI-compatible endpoints are marked experimental. -->
+    <NoWarn>$(NoWarn);SKEXP0001;SKEXP0010;SKEXP0110</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../Core/EcoStream.Application/EcoStream.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" />
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Qdrant.Client" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="EcoStream.AI.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 </Project>
