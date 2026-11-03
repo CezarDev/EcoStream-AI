@@ -68,22 +68,25 @@ internal sealed class IngestTelemetryHandler(
             AnomalyThresholds.Default);
 
         await readings.AddAsync(reading, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Phase 2 replaces this direct publish with the MassTransit transactional outbox.
+        // Transactional outbox: Publish only stages the message in the DbContext;
+        // SaveChanges commits reading + outbox row atomically, then the delivery service sends it.
         var anomaly = reading.DomainEvents.OfType<SevereAnomalyDetected>().SingleOrDefault();
         if (anomaly is not null)
         {
             await eventBus.PublishAsync(ToIntegrationEvent(anomaly, reading), cancellationToken);
         }
 
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
         reading.ClearDomainEvents();
         return new IngestTelemetryResult(reading.Id, IngestOutcome.Recorded, anomaly is not null);
     }
 
     private static AnomalyDetectedIntegrationEvent ToIntegrationEvent(SevereAnomalyDetected e, TelemetryReading r) =>
-        new(e.ReadingId, e.StationCode,
+        new(e.ReadingId, new AnomalySnapshot(
+            e.StationCode,
             e.Location.Latitude, e.Location.Longitude,
             r.RainfallMmPerHour, r.WindGustKmh, r.PressureHpa,
-            e.Reasons, e.OccurredAt);
+            e.Reasons, e.OccurredAt));
 }

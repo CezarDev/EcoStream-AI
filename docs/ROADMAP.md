@@ -19,12 +19,15 @@ Cada fase termina com algo **demonstrável** (bom para post no LinkedIn) e com t
 - **Pendências:** adaptador INMET (exige token), dados oficiais IBGE/ANA/SGB, testes de integração com Testcontainers (Fase 5).
 - **Demo:** worker ingerindo dados reais; `GET /api/geo/neighborhoods/near` respondendo via PostGIS; traces no Jaeger.
 
-## Fase 2 — Event-Driven com RabbitMQ
-- **Transactional Outbox** do MassTransit (EF Core) — elimina a publicação direta no handler.
-- Topologia: exchange fanout para `AnomalyDetected`, topic para `alerts.{severity}.{channel}`.
-- Retry + redelivery + dead-letter (`_error`), idempotência nos consumers.
-- Tracing distribuído ponta a ponta (API → RabbitMQ → Worker) no Jaeger.
-- **Demo:** `POST` de leitura severa → mensagem atravessa filas → trace completo.
+## Fase 2 — Event-Driven com RabbitMQ ✅
+- **Transactional Outbox** do MassTransit (EF Core, Postgres) — `Publish` antes do `SaveChanges`, entrega assíncrona; tabelas `outbox_message`, `outbox_state`, `inbox_state` (migration `AddMessagingOutbox`).
+- **Inbox** em todos os consumers via `ResilientConsumerDefinition<T>` → idempotência por `MessageId`.
+- Topologia: fanout `ecostream.anomaly-detected` / `affected-areas` / `risk-assessed`; topic `ecostream.alerts` com `alerts.{severity}.{channel}` e uma fila por canal.
+- Falhas: retry exponencial → delayed redelivery (imagem RabbitMQ 4.1 com plugin delayed-exchange) → `_error`; erros permanentes pulam retry.
+- Pipeline completo **baseado em regras** (`RiskAssessmentPolicy` no domínio) — baseline/fallback dos agentes da Fase 3. Canais de notificação são stubs que logam.
+- Testes: pipeline ponta a ponta no test harness in-memory do MassTransit.
+- **Pendente (precisa de Docker):** validar contra RabbitMQ/Postgres reais e capturar o trace no Jaeger.
+- **Demo:** `POST` de leitura severa → mensagem atravessa filas → trace completo → alertas por canal no log.
 
 ## Fase 3 — Agentes de IA, MCP & RAG
 - `EcoStream.McpServer` com SDK oficial de MCP para C#: tools `find_neighborhoods_within_radius`, `find_rivers_near`, `get_risk_zones_intersecting` (PostGIS `ST_DWithin`, `ST_Intersects`).

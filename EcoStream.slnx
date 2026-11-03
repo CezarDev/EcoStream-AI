@@ -26,5 +26,6 @@
     <Project Path="tests/EcoStream.Domain.Tests/EcoStream.Domain.Tests.csproj" />
     <Project Path="tests/EcoStream.Application.Tests/EcoStream.Application.Tests.csproj" />
     <Project Path="tests/EcoStream.Infrastructure.Tests/EcoStream.Infrastructure.Tests.csproj" />
+    <Project Path="tests/EcoStream.Agents.Worker.Tests/EcoStream.Agents.Worker.Tests.csproj" />
   </Folder>
 </Solution>

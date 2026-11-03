@@ -21,8 +21,9 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
-        Action<IBusRegistrationConfigurator>? configureConsumers = null) =>
-        services.AddPersistence(configuration).AddMessaging(configuration, configureConsumers);
+        Action<IBusRegistrationConfigurator>? configureConsumers = null,
+        Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configureBus = null) =>
+        services.AddPersistence(configuration).AddMessaging(configuration, configureConsumers, configureBus);
 
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
@@ -54,13 +55,26 @@ public static class DependencyInjection
     public static IServiceCollection AddMessaging(
         this IServiceCollection services,
         IConfiguration configuration,
-        Action<IBusRegistrationConfigurator>? configureConsumers = null)
+        Action<IBusRegistrationConfigurator>? configureConsumers = null,
+        Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configureBus = null)
     {
         services.AddScoped<IEventBus, MassTransitEventBus>();
 
         services.AddMassTransit(x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
+            x.AddDelayedMessageScheduler();
+
+            // Transactional outbox: publishes from scoped services (API, ingestion) are written to
+            // outbox_message inside the same SaveChanges as the business data; a delivery service sends them.
+            x.AddEntityFrameworkOutbox<EcoStreamDbContext>(o =>
+            {
+                o.UsePostgres();
+                o.UseBusOutbox();
+                o.QueryDelay = TimeSpan.FromSeconds(1);
+                o.DuplicateDetectionWindow = TimeSpan.FromHours(1);
+            });
+
             configureConsumers?.Invoke(x);
 
             x.UsingRabbitMq((context, cfg) =>
@@ -72,8 +86,9 @@ public static class DependencyInjection
                     h.Password(rabbit["Password"] ?? "guest");
                 });
 
-                // Consumer-side resilience: exponential retries, then the message goes to the _error queue.
-                cfg.UseMessageRetry(r => r.Exponential(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(2)));
+                cfg.UseDelayedMessageScheduler(); // requires rabbitmq_delayed_message_exchange (see infra/rabbitmq)
+                MessagingTopology.Configure(cfg);
+                configureBus?.Invoke(context, cfg);
                 cfg.ConfigureEndpoints(context);
             });
         });

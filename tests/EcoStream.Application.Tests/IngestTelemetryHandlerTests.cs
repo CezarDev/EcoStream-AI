@@ -55,8 +55,20 @@ public class IngestTelemetryHandlerTests
         result.Should().Match<IngestTelemetryResult>(r => r.Outcome == IngestOutcome.Recorded && r.AnomalyDetected);
         await _readings.Received(1).AddAsync(Arg.Any<TelemetryReading>(), Arg.Any<CancellationToken>());
         await _bus.Received(1).PublishAsync(
-            Arg.Is<AnomalyDetectedIntegrationEvent>(e => e.StationCode == "A801" && e.Latitude == -30.05 && e.Reasons.Count == 2),
+            Arg.Is<AnomalyDetectedIntegrationEvent>(e => e.Anomaly.StationCode == "A801" && e.Anomaly.Latitude == -30.05 && e.Anomaly.Reasons.Count == 2),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Event_is_staged_before_save_so_outbox_commits_atomically()
+    {
+        await _handler.Handle(new IngestTelemetryCommand("A801", At, 72.5, 104, 1000), default);
+
+        Received.InOrder(() =>
+        {
+            _bus.PublishAsync(Arg.Any<AnomalyDetectedIntegrationEvent>(), Arg.Any<CancellationToken>());
+            _uow.SaveChangesAsync(Arg.Any<CancellationToken>());
+        });
     }
 
     [Fact]

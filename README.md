@@ -77,7 +77,7 @@ Prerequisites: .NET SDK 9.0.300+, Docker, Node 20+.
 
 ```bash
 cp .env.example .env
-docker compose up -d                                   # PostGIS, RabbitMQ, Qdrant, Jaeger
+docker compose up -d --build                           # PostGIS, RabbitMQ, Qdrant, Jaeger
 dotnet tool restore                                    # dotnet-ef (local manifest)
 
 dotnet run --project src/Tools/EcoStream.DbMigrator    # migrations + geospatial seed (Porto Alegre)
@@ -98,6 +98,22 @@ Tests: `dotnet test EcoStream.slnx`. Sample requests: `src/Presentation/EcoStrea
 | GET | `/api/stations/{code}/readings?from&to` | Time series (default: last 24h, max 31 days) |
 | GET | `/api/geo/neighborhoods/near?lat&lon&radiusKm` | Neighborhoods within radius (`ST_DWithin`) + flood-zone flag |
 | POST | `/api/telemetry` | Manual reading (idempotent per station + timestamp) |
+
+#### Messaging (Phase 2)
+```
+API / Ingestion ──(outbox)──► ecostream.anomaly-detected (fanout)
+                                   └─► anomaly-detected queue ─► Data Analyst (PostGIS) ──► ecostream.affected-areas (fanout)
+                                                                   └─► Risk Decider (rules-v1) ──► ecostream.risk-assessed (fanout)
+                                                                        └─► Communicator ──► ecostream.alerts (topic, alerts.{severity}.{channel})
+                                                                             ├─ alerts.*.slack    ─► notifications-slack
+                                                                             ├─ alerts.*.telegram ─► notifications-telegram
+                                                                             └─ alerts.*.sms      ─► notifications-sms
+```
+- **Transactional outbox** (MassTransit + EF Core): events are committed with the business data and delivered afterwards — no lost or phantom events.
+- **Inbox / idempotency:** each consumer processes a `MessageId` once, so a redelivery never sends the same SMS twice.
+- **Failure handling:** exponential retry → delayed redelivery (1/5/15 min, RabbitMQ delayed-exchange plugin) → `<queue>_error`. Validation/domain errors skip retries.
+- **Tracing:** trace context flows API → outbox → RabbitMQ → every consumer; see the whole incident as one trace in Jaeger.
+- Steps are interfaces (`IAffectedAreaAnalyzer`, `IRiskDecider`, `IAlertComposer`); Phase 3 plugs AI agents in, rules stay as fallback.
 
 #### Migrations
 ```bash
@@ -191,7 +207,7 @@ Pré-requisitos: .NET SDK 9.0.300+, Docker, Node 20+.
 
 ```bash
 cp .env.example .env
-docker compose up -d                                   # PostGIS, RabbitMQ, Qdrant, Jaeger
+docker compose up -d --build                           # PostGIS, RabbitMQ, Qdrant, Jaeger
 dotnet tool restore                                    # dotnet-ef (manifesto local)
 
 dotnet run --project src/Tools/EcoStream.DbMigrator    # migrations + seed geoespacial (Porto Alegre)
@@ -212,6 +228,22 @@ Testes: `dotnet test EcoStream.slnx`. Exemplos de requisição: `src/Presentatio
 | GET | `/api/stations/{code}/readings?from&to` | Série temporal (padrão: últimas 24h, máx. 31 dias) |
 | GET | `/api/geo/neighborhoods/near?lat&lon&radiusKm` | Bairros no raio (`ST_DWithin`) + flag de zona de inundação |
 | POST | `/api/telemetry` | Leitura manual (idempotente por estação + horário) |
+
+#### Mensageria (Fase 2)
+```
+API / Ingestion ──(outbox)──► ecostream.anomaly-detected (fanout)
+                                   └─► fila anomaly-detected ─► Analista de Dados (PostGIS) ──► ecostream.affected-areas (fanout)
+                                                                  └─► Decisor de Risco (rules-v1) ──► ecostream.risk-assessed (fanout)
+                                                                       └─► Comunicador ──► ecostream.alerts (topic, alerts.{severidade}.{canal})
+                                                                            ├─ alerts.*.slack    ─► notifications-slack
+                                                                            ├─ alerts.*.telegram ─► notifications-telegram
+                                                                            └─ alerts.*.sms      ─► notifications-sms
+```
+- **Transactional outbox** (MassTransit + EF Core): o evento é gravado na mesma transação dos dados e entregue depois — sem evento perdido ou fantasma.
+- **Inbox / idempotência:** cada consumer processa um `MessageId` uma única vez; reentrega nunca manda o mesmo SMS duas vezes.
+- **Falhas:** retry exponencial → redelivery atrasado (1/5/15 min, plugin delayed-exchange) → `<fila>_error`. Erros de validação/domínio não fazem retry.
+- **Tracing:** o contexto do trace atravessa API → outbox → RabbitMQ → cada consumer; o incidente inteiro aparece como um trace no Jaeger.
+- Cada etapa é uma interface (`IAffectedAreaAnalyzer`, `IRiskDecider`, `IAlertComposer`); na Fase 3 entram os agentes de IA e as regras ficam como fallback.
 
 #### Migrations
 ```bash

@@ -2,6 +2,7 @@ using EcoStream.Application.Abstractions;
 using EcoStream.Domain.Stations;
 using EcoStream.Domain.Telemetry;
 using EcoStream.Infrastructure.Persistence.Geo;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoStream.Infrastructure.Persistence;
@@ -23,5 +24,10 @@ public sealed class EcoStreamDbContext(DbContextOptions<EcoStreamDbContext> opti
     {
         modelBuilder.HasPostgresExtension("postgis");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EcoStreamDbContext).Assembly);
+
+        // MassTransit transactional outbox + consumer inbox (idempotency) tables.
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 }

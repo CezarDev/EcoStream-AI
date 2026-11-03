@@ -4,6 +4,7 @@
   <ItemGroup Label="Application">
     <PackageVersion Include="MediatR" Version="12.4.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup Label="Persistence">
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
@@ -14,7 +15,9 @@
     <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup Label="Messaging">
-    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.3.6" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.12" />
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.5.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup Label="Resilience">
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />

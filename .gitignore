@@ -15,3 +15,6 @@ dist/
 
 # Local notes
 instructions.txt
+
+# Claude Code
+.claude/

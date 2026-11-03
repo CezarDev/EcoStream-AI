@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageReference Include="MediatR" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="EcoStream.Application.Tests" />

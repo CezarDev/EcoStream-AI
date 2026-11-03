@@ -20,7 +20,8 @@ services:
       retries: 10
 
   rabbitmq:
-    image: rabbitmq:4.0-management
+    build: ./infra/rabbitmq          # rabbitmq:4.1-management + delayed message exchange plugin
+    image: ecostream/rabbitmq:4.1-delayed
     container_name: ecostream-rabbitmq
     hostname: ecostream-rabbitmq
     environment:

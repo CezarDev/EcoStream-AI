@@ -1,3 +1,4 @@
+using EcoStream.Application.Pipeline;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,16 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
+        return services;
+    }
+
+    /// <summary>Rule-based incident pipeline (Data Analyst → Risk Decider → Communicator).</summary>
+    public static IServiceCollection AddIncidentPipeline(this IServiceCollection services)
+    {
+        services.AddOptions<PipelineOptions>().BindConfiguration(PipelineOptions.Section);
+        services.AddScoped<IAffectedAreaAnalyzer, PostGisAffectedAreaAnalyzer>();
+        services.AddSingleton<IRiskDecider, RuleBasedRiskDecider>();
+        services.AddSingleton<IAlertComposer, RuleBasedAlertComposer>();
         return services;
     }
 }

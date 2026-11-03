@@ -1,6 +1,6 @@
 namespace EcoStream.Notifications.Channels;
 
-/// <summary>One implementation per channel (Telegram, Twilio SMS/Voice, Slack/Teams webhook) — Phase 4.</summary>
+/// <summary>One implementation per channel (Telegram, Twilio SMS/Voice, Slack/Teams webhook).</summary>
 public interface INotificationChannel
 {
     string Name { get; }
